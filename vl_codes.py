@@ -9,25 +9,28 @@ def shannon_fano(p):
     # Compute the cumulative probability distribution
     # this can be done easily with numpy.cumsum but we will do it by hand. Note
     # that this is not a time-critical operation so efficiency is not an issue.
-    
+
     # step 1: initialise f to be a list with one element 0 (this is because Shannon
     # requires the cumulative probability to be the sum up to AND EXCLUDING the current
     # symbol, so the first element of f should be zero.
-    
+
     # ... (whenever you see "..." you are expected to complete a missing command
+    f = [0]
 
     # step 2: compute the runninng sum
     for a in p: # for every probability in p
         # you now want to append to f the sum of its last entry (which you can access as [-1])
         # and the probability p[a] of the current symbol
-
+        
         # ...
+        f.append(f[-1] + p[a])
 
     # the resulting cumulative has one too many element at the end, the sum of all probabilities
     # that should equal to one. You can use the "pop" command to delete the last element in a list.
 
     # ...
-
+    f.pop() # remove the last element (which should be 1.0)
+    
     # We now convert the list you computed into a dictionary
     f = dict([(a,mf) for a,mf in zip(p,f)])
 
@@ -41,25 +44,28 @@ def shannon_fano(p):
         #...
         # (assign variable name "length")
 
+        length = ceil(-log2(p[a]))
+
         codeword = [] # initialise current codeword
         myf = f[a]
         # for each position in length, we will multiply myf by 2 and take the
         # integral part as our binary digit
         for pos in range(length):
             # multiply myf by 2 (shifting it "left" in binary)
-            #...
+            myf *= 2
 
             # if the resulting myf is larger than 1, append a 1 to the codeword,
             # whereas if it is smaller than 1 you should append a 0
             # If it is larger than 1, you sould also substratct 1 from myf.
-            #...
-            #...
-            #...
-            #...
-            #...
+            if myf >= 1:
+                codeword.append(1)
+                myf -= 1
+            else:
+                codeword.append(0)
         code[a] = codeword # assign the codeword
-        
+
     return code # return the code table
+
 
 
 def huffman(p):
@@ -85,39 +91,54 @@ def huffman(p):
         # second entry from a tuple.) Note that the natural order of "sorted" is
         # increasing, which is as you want it in this case.
         # The output of sorted() can be written back to p (i.e. p = sorted(p, ....))
+
         #...
+        p = sorted(p, key=lambda el: el[1])
 
         # Now append a new node to the tree xt with no parent (parent = -1),
         # no children (children = []) and label str(nodelabel)
+
         #...
+        if nodelabel >= len(xt):
+            xt.append([-1, [], str(nodelabel)])
 
         # we incrase the variable nodelabel by 1 for its next use
         nodelabel += 1
 
-        # assign parent of the nodes pointed to by the smallest probabilities 
+        # assign parent of the nodes pointed to by the smallest probabilities
         # Note that the smallest probabilities are now p[0] and p[1], so their
         # pointers to nodes in xt are p[0][0] and p[1][0]. The corresponding
         # xt nodes should be assigned the new node you created as a parent,
         # whose index is len(xt)-1 since it has been appended at the end of xt
+
         #...
+        if p[0][0] != -1:
+            xt[p[0][0]][0] = len(xt)-1
         #...
-        
+        if p[1][0] != -1:
+            xt[p[1][0]][0] = len(xt)-1
+
         # assign the children of new node to be the nodes pointed to by
         # p[0] and p[1]. Note that the new node can be addressed as xt[-1]
+
         #...
+        xt[len(xt)-1][1] = [p[0][0], p[1][0]]
 
         # create a new entry pointing to the new node in the list of probabilities
         # This new entry should be a tuple with len(xt)-1 as its first element,
         # and the sum of the probabilities in p[0] and p[1] as its second element
+
         #...
+        p.append((len(xt)-1, p[0][1] + p[1][1]))
 
         # remove the two nodes with the smallest probability
         p.pop(0)
         p.pop(0)
         # (using pop(0) twice removes the first element of the list twice
         # and hence removes the first 2 elements.)
-        
+
     return(xt)
+
 
 
 
